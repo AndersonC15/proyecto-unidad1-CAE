@@ -1,0 +1,7 @@
+ID;NombreCliente;Estado;EsUrgente;NextNotaId
+5;MEco;EN_ATENCION;false;4
+7;Jana;EN_COLA;false;1
+6;PEdrin;URGENTE;true;1
+8;Peter;URGENTE;true;1
+1;Juan;COMPLETADO;false;4
+2;María;COMPLETADO;false;3
