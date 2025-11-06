@@ -46,6 +46,7 @@ public class ListaNotas {
         return notaEliminada;
     }
 
+    // Recorrer para listar
     public void mostrar() {
         if (estaVacia()) {
             System.out.println("  (No hay notas registradas para este ticket)");
@@ -59,7 +60,9 @@ public class ListaNotas {
         }
     }
 
-
+    /**
+     * NUEVO: Para reporte Top-K [cite: 49, 62]
+     */
     public int getTamanio() {
         int contador = 0;
         NodoNota actual = cabeza;
@@ -70,7 +73,9 @@ public class ListaNotas {
         return contador;
     }
 
-
+    /**
+     * NUEVO: Para persistencia
+     */
     public NodoNota getCabeza() {
         return cabeza;
     }
