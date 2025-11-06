@@ -4,7 +4,7 @@ import modelo.Accion;
 import modelo.Estado;
 import modelo.Ticket;
 
-// Acción concreta para cambiar el estado (Undo/Redo de TICKET)
+//Cambio de estado segun el undo/redo(Accion)
 public class AccionCambiarEstado extends Accion {
 
     private final Ticket ticket;
@@ -18,13 +18,13 @@ public class AccionCambiarEstado extends Accion {
         this.estadoNuevo = estadoNuevo;
     }
 
-    // Ejecutar (para Redo): Aplica el nuevo estado
+    // Aplica un nuevo estado(redo), reaplicando el cambio deshecho
     @Override
     public void ejecutar() {
         ticket.cambiarEstado(estadoNuevo);
     }
 
-    // Deshacer (para Undo): Vuelve al estado anterior
+    // Elimina el ultimo cambio(undo), volviendo al estado anterior
     @Override
     public void deshacer() {
         ticket.cambiarEstado(estadoAnterior);
@@ -35,4 +35,5 @@ public class AccionCambiarEstado extends Accion {
         return String.format("CAMBIO_ESTADO: Ticket #%d - De %s a %s",
                 ticket.getId(), estadoAnterior, estadoNuevo);
     }
+
 }
