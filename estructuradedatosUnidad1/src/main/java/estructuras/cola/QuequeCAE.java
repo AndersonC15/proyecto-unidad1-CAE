@@ -61,7 +61,6 @@ public class QuequeCAE {
             if (frente == null) {
                 fin = null;
             }
-
             tamanio--;
             return ticketAtendido;
         }

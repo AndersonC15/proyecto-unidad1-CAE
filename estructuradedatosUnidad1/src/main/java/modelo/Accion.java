@@ -22,7 +22,6 @@ public abstract class Accion {
         return String.format("%s: %s", tipo, descripcion);
     }
 
-    // NUEVO: permite un resumen más detallado que las acciones concretas pueden sobreescribir
     public String getResumenDetallado() {
         return getResumen(); // por defecto, mismo resumen
     }

@@ -11,7 +11,6 @@ public class NodoNota {
         this.siguiente = null;
     }
 
-    // Getters y Setters
     public Nota getDato() { return dato; }
     public NodoNota getSiguiente() { return siguiente; }
     public void setSiguiente(NodoNota siguiente) { this.siguiente = siguiente; }

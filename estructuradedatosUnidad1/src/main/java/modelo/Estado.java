@@ -2,11 +2,11 @@ package modelo;
 
 public enum Estado {
     EN_COLA("EN COLA"),
-    URGENTE("URGENTE"), // <-- NUEVO ESTADO
+    URGENTE("URGENTE"), // Estado para la cola de prioridad
     EN_ATENCION("EN ATENCIÓN"),
     EN_PROCESO("EN PROCESO"),
     PENDIENTE_DOCS("PENDIENTE DOCS"),
-    COMPLETADO("COMPLETADO");
+    COMPLETADO("COMPLETADO"); // Estado final
 
     private final String descripcion;
 
@@ -17,5 +17,16 @@ public enum Estado {
     @Override
     public String toString() {
         return descripcion;
+    }
+
+    public static Estado fromString(String text) {
+        for (Estado e : Estado.values()) {
+            if (e.name().equalsIgnoreCase(text) || e.descripcion.equalsIgnoreCase(text)) {
+                return e;
+            }
+        }
+
+        // Devuelve EN_COLA como default seguro si no se encuentra
+        return EN_COLA;
     }
 }

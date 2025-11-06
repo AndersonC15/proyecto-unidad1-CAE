@@ -8,15 +8,13 @@ public class PilaAcciones {
 
     // Push: insertar en la cima
     public void push(Accion accion) {
-        // Uso del constructor con enlace
         tope = new NodoPila(accion, tope);
         size++;
     }
 
     // Pop: sacar de la cima
     public Accion pop() {
-        if (estaVacia()) return null; // Caso borde: pila vacía [cite: 27]
-
+        if (estaVacia()) return null;
         Accion a = tope.getDato();
         // Mover el tope al siguiente (referencia en el nodo)
         tope = tope.getSiguiente();
@@ -24,12 +22,14 @@ public class PilaAcciones {
         return a;
     }
 
-
     public boolean estaVacia() {
         return tope == null;
     }
 
     public int getSize() {
         return size;
+    }
+
+    public void limpiar() {
     }
 }

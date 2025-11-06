@@ -6,7 +6,6 @@ import estructuras.lista.NodoNota;
 import modelo.Estado;
 import modelo.Nota;
 import modelo.Ticket;
-
 import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.io.IOException;
@@ -63,7 +62,6 @@ public class PersistenciaService {
             if (gestor.getTicketEnAtencion() != null) {
                 escribirTicketYNotas(gestor.getTicketEnAtencion(), ticketWriter, notaWriter);
             }
-
             System.out.println("Datos guardados exitosamente.");
 
         } catch (IOException e) {

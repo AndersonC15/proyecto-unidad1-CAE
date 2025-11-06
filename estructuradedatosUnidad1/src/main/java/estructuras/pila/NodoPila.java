@@ -12,8 +12,6 @@ public class NodoPila {
         this.siguiente = siguiente;
     }
 
-    // Getters y Setters
     public Accion getDato() { return dato; }
     public NodoPila getSiguiente() { return siguiente; }
-
 }

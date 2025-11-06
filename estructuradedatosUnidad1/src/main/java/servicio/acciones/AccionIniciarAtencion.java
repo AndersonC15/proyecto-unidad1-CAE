@@ -21,7 +21,6 @@ public class AccionIniciarAtencion extends Accion {
 
     @Override
     public void ejecutar() {
-        // REHACER: Vuelve a poner el ticket en 'ticketEnAtencion'
 
         Ticket t;
         if (eraUrgente) {
@@ -37,7 +36,6 @@ public class AccionIniciarAtencion extends Accion {
         if (eraUrgente) {
             ticketAtendido.setEsUrgente(false);
         }
-        // -------------------------
     }
 
     @Override
@@ -60,7 +58,6 @@ public class AccionIniciarAtencion extends Accion {
 
     @Override
     public String getResumenDetallado() {
-        // (El resumen no cambia)
         return String.format("INICIAR ATENCIÓN: Ticket #%d (%s) movido a EN ATENCIÓN",
                 ticketAtendido.getId(), eraUrgente ? "Urgente" : "Normal");
     }
