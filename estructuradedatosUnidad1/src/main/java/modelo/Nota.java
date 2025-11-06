@@ -8,8 +8,6 @@ public record Nota (int id, String texto, LocalDateTime fechaHora){
         this(id, texto, LocalDateTime.now());
     }
 
-    //usamos record ya que es una clase basica e inmmutable
-
     @Override
     public String toString() {
         return String.format("Nota ID: %-3d | Texto: %-20s | Fecha: %s",
