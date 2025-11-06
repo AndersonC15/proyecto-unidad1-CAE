@@ -4,11 +4,11 @@ import modelo.Accion;
 import modelo.Nota;
 import estructuras.lista.ListaNotas;
 
-// Acción concreta para eliminar una nota (Undo/Redo de TICKET)
+// Accion para eliminar notas especificas
 public class AccionEliminarNota extends Accion {
 
     private final ListaNotas listaNotas;
-    private final Nota notaEliminada; // Guardamos la Nota que se eliminó
+    private final Nota notaEliminada; // Guardamos la nota eliminada
 
     public AccionEliminarNota(ListaNotas listaNotas, Nota notaEliminada) {
         super("ELIMINAR_NOTA", "Nota ID " + notaEliminada.id() + " eliminada.");
@@ -16,13 +16,13 @@ public class AccionEliminarNota extends Accion {
         this.notaEliminada = notaEliminada;
     }
 
-    // Ejecutar (para Redo): Re-elimina la nota
+    // Reeliminacion de notas
     @Override
     public void ejecutar() {
         listaNotas.eliminar(notaEliminada.id());
     }
 
-    // Deshacer (para Undo): Re-inserta la nota eliminada al inicio
+    //Reinserta la nota eliminada
     @Override
     public void deshacer() {
         listaNotas.insertarInicio(notaEliminada);
@@ -33,4 +33,5 @@ public class AccionEliminarNota extends Accion {
         return String.format("ELIMINAR_NOTA: Nota ID %d: \"%s\"",
                 notaEliminada.id(), notaEliminada.texto());
     }
+
 }
