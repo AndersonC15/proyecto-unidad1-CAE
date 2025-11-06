@@ -1,7 +1,7 @@
 package consola;
 
 import modelo.Estado;
-import modelo.Ticket; // Importar Ticket
+import modelo.Ticket;
 import servicio.GestorTickets;
 import servicio.PersistenciaService;
 
@@ -38,7 +38,7 @@ public class SistemaCAE {
                     case 1: recibirNuevoCaso(); break;
                     case 2: gestor.listarCasosEnEspera(); break;
                     case 3: iniciarAtencion(); break;
-                    case 4: gestorAtencion(); break;
+                    case 4: gestorAtencion(); break; // Llama al gestor modificado
                     case 5: gestionarConsultaHistorial(); break;
                     case 6: ejecutarReportes(); break;
                     case 7: deshacerGlobal(); break;
@@ -66,7 +66,6 @@ public class SistemaCAE {
         System.out.println("1. Recepción de Nuevo Caso (Encolar)");
         System.out.println("2. Consultar Casos en Espera");
         System.out.println("3. Iniciar Atención del Siguiente Caso (Prioridad Urgente)");
-        // Texto actualizado
         System.out.println("4. Gestionar Caso EN ATENCIÓN");
         System.out.println("5. Consultar Historial de Casos Finalizados");
         System.out.println("--- Administración y Reportes ---");
@@ -78,6 +77,10 @@ public class SistemaCAE {
         System.out.print("Seleccione una opción: ");
     }
 
+    /**
+     * MODIFICADO (Paso 8 de tu flujo)
+     * Añade la llamada a limpiarHistorialTicket() al final.
+     */
     private static void gestorAtencion() {
         // 1. Validación de entrada
         if (gestor.getTicketEnAtencion() == null && gestor.undoTicketCount() == 0 && gestor.redoTicketCount() == 0) {
@@ -88,14 +91,15 @@ public class SistemaCAE {
 
         boolean volverAlMenuPrincipal = false;
 
+        // 2. Bucle de estado (permanece aquí)
         while (!volverAlMenuPrincipal) {
 
             try {
                 if (gestor.getTicketEnAtencion() != null) {
-                    // Ticket Activo
+                    // --- MODO 1: Ticket Activo ---
                     volverAlMenuPrincipal = manejarMenuConTicket();
                 } else {
-                    // Sin Ticket
+                    // --- MODO 2: Sin Ticket (Pero con historial) ---
                     volverAlMenuPrincipal = manejarMenuSinTicket();
                 }
             } catch (InputMismatchException e) {
@@ -103,11 +107,20 @@ public class SistemaCAE {
                 scanner.nextLine(); // Limpiar buffer
             }
 
-        }
+        } // fin while
+
+        // --- INICIO DE CORRECCIÓN (Paso 8) ---
+        // Al salir del bucle (Opción 0), limpiamos el historial del ticket.
+        gestor.limpiarHistorialTicket();
+        // --- FIN DE CORRECCIÓN ---
 
         System.out.println("Volviendo al Menú Principal...");
     }
 
+    /**
+     * Helper (Sin cambios)
+     * Muestra y maneja el menú cuando HAY un ticket activo.
+     */
     private static boolean manejarMenuConTicket() throws InputMismatchException {
         Ticket actual = gestor.getTicketEnAtencion();
         System.out.println("\n--- GESTIÓN DEL TICKET #" + actual.getId() + " (" + actual.getEstado() + ") ---");
@@ -135,6 +148,7 @@ public class SistemaCAE {
             case 5: gestor.rehacerAccionTicket(); break;
             case 6:
                 finalizarCasoEnAtencion();
+                // Ya no cambia 'volverAlMenuPrincipal', se queda en el bucle
                 break;
             case 0:
                 return true; // Salir al menú principal
@@ -144,6 +158,10 @@ public class SistemaCAE {
         return false; // Permanecer en el menú de gestión
     }
 
+    /**
+     * Helper (Sin cambios)
+     * Muestra y maneja el menú cuando NO hay ticket activo (post-finalización).
+     */
     private static boolean manejarMenuSinTicket() throws InputMismatchException {
         System.out.println("\n--- GESTIÓN (Ticket No Activo) ---");
         System.out.println("El ticket no está en atención, pero hay acciones del último");
@@ -163,8 +181,6 @@ public class SistemaCAE {
                 if (gestor.deshacerAccionTicket()) {
                     if (gestor.getTicketEnAtencion() != null) {
                         System.out.println("Ticket #" + gestor.getTicketEnAtencion().getId() + " restaurado a 'EN ATENCIÓN'.");
-                        // El bucle 'while' ahora detectará el ticket
-                        // y cambiará solo al 'manejarMenuConTicket'.
                     }
                 }
                 break;
@@ -172,7 +188,6 @@ public class SistemaCAE {
                 if (gestor.rehacerAccionTicket()) {
                     if (gestor.getTicketEnAtencion() == null) {
                         System.out.println("Acción 'Finalizar/Re-encolar' rehecha.");
-                        // Continuar en este menú
                     }
                 }
                 break;
@@ -183,6 +198,8 @@ public class SistemaCAE {
         }
         return false; // Permanecer en el menú de gestión
     }
+
+    // --- Métodos de gestión de ticket (SIN CAMBIOS) ---
 
     private static void registrarNotaEnAtencion() {
         System.out.print("Escriba la observación (nota): ");
@@ -227,6 +244,8 @@ public class SistemaCAE {
         System.out.println("\n--- Finalizando Gestión del Ticket ---");
         return gestor.finalizarCaso();
     }
+
+    // --- Métodos de gestión de historial y reportes (SIN CAMBIOS) ---
 
     private static void gestionarConsultaHistorial() {
         if (!gestor.hayTicketsFinalizados()) {
@@ -348,6 +367,8 @@ public class SistemaCAE {
             System.out.println("Saliendo sin guardar cambios.");
         }
     }
+
+    // --- Métodos 'helper' (que copiaste de la vez anterior)
 
     private static void recibirNuevoCaso() {
         System.out.println("\n--- Recepción de Nuevo Caso ---");

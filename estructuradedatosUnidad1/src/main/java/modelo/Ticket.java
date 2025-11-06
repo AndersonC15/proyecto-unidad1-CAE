@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Ticket {
+    // Generador de ID para el ticket
     private static final AtomicInteger GENERADOR_ID = new AtomicInteger(1);
     private int id;
     private String nombreCliente;
@@ -33,6 +34,7 @@ public class Ticket {
         this.listaNotas = new ListaNotas();
         this.generadorIdNota = new AtomicInteger(nextNotaId);
         this.fechaFinalizacion = fechaFinalizacion;
+
         GENERADOR_ID.set(Math.max(GENERADOR_ID.get(), id + 1));
     }
 
@@ -70,9 +72,12 @@ public class Ticket {
     public ListaNotas getListaNotas() { return listaNotas; }
     public boolean esUrgente() { return esUrgente; }
     public void setEsUrgente(boolean esUrgente) { this.esUrgente = esUrgente; }
+
+
     public static void setGeneradorId(int id) { GENERADOR_ID.set(id); }
     public static int getNextGeneradorId() { return GENERADOR_ID.get(); }
     public int getNextNotaId() { return generadorIdNota.get(); }
+
 
     public LocalDateTime getFechaFinalizacion() {
         return fechaFinalizacion;

@@ -12,7 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.TreeMap;
-
+import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -34,7 +34,8 @@ public class GestorTickets {
         this.ticketsFinalizados = new TreeMap<>();
     }
 
-    // Método para guardar los tickets en una de las dos colas (normal/urgente)
+    // --- Métodos de Acción Global (Menú Principal) ---
+
     public void recibirNuevoCaso(String nombreCliente, boolean esUrgente) {
         Estado estadoInicial = esUrgente ? Estado.URGENTE : Estado.EN_COLA;
         Ticket nuevoTicket = new Ticket(nombreCliente, estadoInicial, esUrgente);
@@ -45,28 +46,13 @@ public class GestorTickets {
             colaNormal.enqueque(nuevoTicket);
         }
 
+        // (Paso 1) Solo registra en el historial global
         undoRedoGlobal.registrarAccion(new AccionRecibirTicket(this, nuevoTicket));
+
         System.out.println("Nuevo ticket recibido y encolado: ");
         System.out.println(nuevoTicket.toString());
     }
 
-    // Método para leer los tickets de la cola (normal/urgente) y listarlos
-    public void listarCasosEnEspera() {
-        System.out.println("\n--- Casos en Espera ---");
-        System.out.println("\n== EN ATENCIÓN ==");
-        if (ticketEnAtencion != null) {
-            System.out.println("  -> " + ticketEnAtencion.toString());
-        } else {
-            System.out.println("  (Nadie en atención)");
-        }
-        System.out.println("\n== COLA URGENTE (" + colaUrgente.getTamanio() + ") ==");
-        colaUrgente.listar();
-        System.out.println("\n== COLA NORMAL (" + colaNormal.getTamanio() + ") ==");
-        colaNormal.listar();
-        System.out.println("---------------------------------");
-    }
-
-    // Método encargado de atendedr el primer ticket de la cola (normal/urgente) usando FIFO
     public boolean iniciarAtencion() {
         if (ticketEnAtencion != null) {
             System.err.println("Error: Ya hay un ticket en atención (#" + ticketEnAtencion.getId() + ").");
@@ -80,27 +66,30 @@ public class GestorTickets {
             siguiente = colaUrgente.dequeue();
             eraUrgente = true;
             System.out.println("Atendiendo siguiente caso URGENTE...");
-        } else if (!colaNormal.estaVacia()) {
+        }
+        else if (!colaNormal.estaVacia()) {
             siguiente = colaNormal.dequeue();
             System.out.println("La cola urgente está vacía. Atendiendo siguiente caso NORMAL...");
-        } else {
+        }
+        else {
             System.err.println("Las colas (Urgente y Normal) están vacías. No hay casos para atender.");
             return false;
         }
 
         ticketEnAtencion = siguiente;
 
-        // Guardar el anterior estado de la acción IniciarAtención, para un UNDO
+        // (Paso 2) Solo registra en el historial global
         undoRedoGlobal.registrarAccion(new AccionIniciarAtencion(this, ticketEnAtencion));
 
         ticketEnAtencion.cambiarEstado(Estado.EN_ATENCION);
 
         if (eraUrgente) {
-            ticketEnAtencion.setEsUrgente(false); // Consumir urgencia
+            ticketEnAtencion.setEsUrgente(false);
             System.out.println("Info: La prioridad URGENTE del Ticket #" + ticketEnAtencion.getId() + " ha sido consumida.");
         }
 
-        undoRedoTicket.limpiar(); // Limpiar historial del ticket anterior
+        // Limpia el historial del ticket ANTERIOR al iniciar uno nuevo
+        undoRedoTicket.limpiar();
 
         System.out.println("\n--- Iniciando Atención ---");
         System.out.println(ticketEnAtencion.toString());
@@ -108,7 +97,8 @@ public class GestorTickets {
         return true;
     }
 
-    // Método para la lógica de finalizar caso (FINALIZAR/RE-ENCOLAR ticket)
+    // --- Métodos de Acción de Ticket (Menú Secundario) ---
+
     public boolean finalizarCaso() {
         if (ticketEnAtencion == null) {
             System.err.println("Error: No hay caso en atención para finalizar.");
@@ -123,12 +113,17 @@ public class GestorTickets {
             return false;
         }
 
-
         if (estadoFinal == Estado.COMPLETADO) {
             ticketEnAtencion.setFechaFinalizacion(LocalDateTime.now());
         }
 
+        // (Paso 6)
         undoRedoTicket.registrarAccion(new AccionFinalizarCaso(this, ticketEnAtencion));
+
+        // --- INICIO DE CORRECCIÓN (Paso 6) ---
+        // Acción secundaria limpia historial principal
+        undoRedoGlobal.limpiar();
+        // --- FIN DE CORRECCIÓN ---
 
         Ticket ticketFinalizado = ticketEnAtencion;
         ticketEnAtencion = null;
@@ -139,7 +134,6 @@ public class GestorTickets {
             System.out.println("Ticket #" + ticketFinalizado.getId() + " movido al historial.");
         }
         else {
-            // Re-encolar (PENDIENTE_DOCS, EN_PROCESO)
             if (ticketFinalizado.esUrgente()) {
                 colaUrgente.enqueque(ticketFinalizado);
                 System.out.println("\n--- Caso Re-encolado (URGENTE) ---");
@@ -164,7 +158,15 @@ public class GestorTickets {
         }
         Nota nuevaNota = ticketEnAtencion.agregarNota(texto);
         AccionAgregarNota accion = new AccionAgregarNota(ticketEnAtencion, nuevaNota);
+
+        // (Paso 4)
         undoRedoTicket.registrarAccion(accion);
+
+        // --- INICIO DE CORRECCIÓN (Paso 4) ---
+        // Acción secundaria limpia historial principal
+        undoRedoGlobal.limpiar();
+        // --- FIN DE CORRECCIÓN ---
+
         System.out.println("Nota agregada y acción registrada para Undo (Ticket).");
         return true;
     }
@@ -178,6 +180,12 @@ public class GestorTickets {
         if (notaEliminada != null) {
             AccionEliminarNota accion = new AccionEliminarNota(ticketEnAtencion.getListaNotas(), notaEliminada);
             undoRedoTicket.registrarAccion(accion);
+
+            // --- INICIO DE CORRECCIÓN ---
+            // Acción secundaria limpia historial principal
+            undoRedoGlobal.limpiar();
+            // --- FIN DE CORRECCIÓN ---
+
             System.out.println("Nota ID " + idNota + " eliminada y acción registrada para Undo (Ticket).");
             return true;
         } else {
@@ -202,11 +210,21 @@ public class GestorTickets {
         }
         ticketEnAtencion.cambiarEstado(nuevoEstado);
         AccionCambiarEstado accion = new AccionCambiarEstado(ticketEnAtencion, estadoAnterior, nuevoEstado);
+
+        // (Paso 5)
         undoRedoTicket.registrarAccion(accion);
+
+        // --- INICIO DE CORRECCIÓN (Paso 5) ---
+        // Acción secundaria limpia historial principal
+        undoRedoGlobal.limpiar();
+        // --- FIN DE CORRECCIÓN ---
+
         System.out.println("Estado del Ticket #" + ticketEnAtencion.getId() + " cambiado a " + nuevoEstado + ".");
         System.out.println("Acción registrada para Undo (Ticket).");
         return true;
     }
+
+    // --- Métodos de Undo/Redo ---
 
     public boolean deshacerAccionTicket() {
         if (ticketEnAtencion == null && undoRedoTicket.getSize() == 0) {
@@ -228,13 +246,37 @@ public class GestorTickets {
         return undoRedoGlobal.rehacer();
     }
 
+    /**
+     * NUEVO: Limpia solo el historial de acciones del ticket.
+     * Se llama desde la consola cuando el usuario sale del sub-menú de gestión.
+     */
+    public void limpiarHistorialTicket() {
+        // (Paso 8)
+        undoRedoTicket.limpiar();
+    }
+
+    // --- (El resto de la clase: listar, reportes, getters, persistencia, etc. SIN CAMBIOS) ---
+    public void listarCasosEnEspera() {
+        System.out.println("\n--- Casos en Espera ---");
+        System.out.println("\n== EN ATENCIÓN ==");
+        if (ticketEnAtencion != null) {
+            System.out.println("  -> " + ticketEnAtencion.toString());
+        } else {
+            System.out.println("  (Nadie en atención)");
+        }
+        System.out.println("\n== COLA URGENTE (" + colaUrgente.getTamanio() + ") ==");
+        colaUrgente.listar();
+        System.out.println("\n== COLA NORMAL (" + colaNormal.getTamanio() + ") ==");
+        colaNormal.listar();
+        System.out.println("---------------------------------");
+    }
+
     public void listarTicketsFinalizados() {
         System.out.println("\n--- Historial de Casos Finalizados (COMPLETADO) ---");
         if (ticketsFinalizados.isEmpty()) {
             System.out.println("  (No hay casos completados en el historial)");
             return;
         }
-
         for (Ticket t : ticketsFinalizados.values()) {
             String fechaStr = (t.getFechaFinalizacion() != null) ?
                     t.getFechaFinalizacion().toLocalDate().toString() : "N/A";
@@ -249,32 +291,23 @@ public class GestorTickets {
             System.out.println("  (No hay casos completados en el historial)");
             return false;
         }
-
-        // Convertir LocalDate a LocalDateTime para un rango inclusivo
         LocalDateTime inicioDelDia = fechaDesde.atStartOfDay();
-        LocalDateTime finDelDia = fechaHasta.atTime(LocalTime.MAX); // 23:59:59.999...
-        // hora,minuto,segundo,milesimosegundos
-
+        LocalDateTime finDelDia = fechaHasta.atTime(LocalTime.MAX);
         int contador = 0;
-
         for (Ticket t : ticketsFinalizados.values()) {
             LocalDateTime fechaFin = t.getFechaFinalizacion();
-
             if (fechaFin != null &&
                     !fechaFin.isBefore(inicioDelDia) &&
                     !fechaFin.isAfter(finDelDia)) {
-
                 if (contador == 0) {
                     System.out.println("\n--- Casos Finalizados Encontrados ---");
                 }
-
                 String fechaStr = fechaFin.toLocalDate().toString();
                 System.out.printf("  ID: %-3d | Cliente: %-20s | Fecha Fin: %-10s | Estado: %s\n",
                         t.getId(), t.getNombreCliente(), fechaStr, t.getEstado());
                 contador++;
             }
         }
-
         System.out.println("-----------------------------------------------------------------");
         if (contador == 0) {
             System.out.println("  (No se encontraron tickets en el rango de fechas seleccionado)");
@@ -292,8 +325,7 @@ public class GestorTickets {
         System.out.println("\n--- Historial Detallado del Ticket #" + idTicket + " ---");
         System.out.println(ticket.toString());
         if (ticket.getFechaFinalizacion() != null) {
-            System.out.println("Fecha Finalización: " + ticket.getFechaFinalizacion().format(java.time.format.
-                    DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+            System.out.println("Fecha Finalización: " + ticket.getFechaFinalizacion().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
         }
         System.out.println("\n  Notas Registradas:");
         ticket.getListaNotas().mostrar();
@@ -338,6 +370,7 @@ public class GestorTickets {
     public QuequeCAE getColaNormal() { return colaNormal; }
     public QuequeCAE getColaUrgente() { return colaUrgente; }
     public TreeMap<Integer, Ticket> getTicketsFinalizados() { return ticketsFinalizados; }
+
     public void limpiarTodo() {
         colaNormal.limpiar();
         colaUrgente.limpiar();
