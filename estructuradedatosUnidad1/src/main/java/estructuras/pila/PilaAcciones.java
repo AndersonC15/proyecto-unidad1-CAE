@@ -32,3 +32,4 @@ public class PilaAcciones {
     public int getSize() {
         return size;
     }
+}
