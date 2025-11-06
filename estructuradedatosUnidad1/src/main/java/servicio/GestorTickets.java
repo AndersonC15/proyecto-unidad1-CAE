@@ -12,7 +12,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.TreeMap;
-import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -34,8 +33,7 @@ public class GestorTickets {
         this.ticketsFinalizados = new TreeMap<>();
     }
 
-    // --- Métodos de Acción Global (Menú Principal) ---
-
+    // Método para gestionar la entrada de tickets en cola normal o urgente
     public void recibirNuevoCaso(String nombreCliente, boolean esUrgente) {
         Estado estadoInicial = esUrgente ? Estado.URGENTE : Estado.EN_COLA;
         Ticket nuevoTicket = new Ticket(nombreCliente, estadoInicial, esUrgente);
@@ -46,13 +44,13 @@ public class GestorTickets {
             colaNormal.enqueque(nuevoTicket);
         }
 
-        // (Paso 1) Solo registra en el historial global
         undoRedoGlobal.registrarAccion(new AccionRecibirTicket(this, nuevoTicket));
 
         System.out.println("Nuevo ticket recibido y encolado: ");
         System.out.println(nuevoTicket.toString());
     }
 
+    // Método para gestionar la entrada de tickets en cola normal o urgente
     public boolean iniciarAtencion() {
         if (ticketEnAtencion != null) {
             System.err.println("Error: Ya hay un ticket en atención (#" + ticketEnAtencion.getId() + ").");
@@ -78,7 +76,6 @@ public class GestorTickets {
 
         ticketEnAtencion = siguiente;
 
-        // (Paso 2) Solo registra en el historial global
         undoRedoGlobal.registrarAccion(new AccionIniciarAtencion(this, ticketEnAtencion));
 
         ticketEnAtencion.cambiarEstado(Estado.EN_ATENCION);
@@ -97,8 +94,7 @@ public class GestorTickets {
         return true;
     }
 
-    // --- Métodos de Acción de Ticket (Menú Secundario) ---
-
+    // método que gestiona lo sucedio al finalizar
     public boolean finalizarCaso() {
         if (ticketEnAtencion == null) {
             System.err.println("Error: No hay caso en atención para finalizar.");
@@ -117,13 +113,11 @@ public class GestorTickets {
             ticketEnAtencion.setFechaFinalizacion(LocalDateTime.now());
         }
 
-        // (Paso 6)
+
         undoRedoTicket.registrarAccion(new AccionFinalizarCaso(this, ticketEnAtencion));
 
-        // --- INICIO DE CORRECCIÓN (Paso 6) ---
-        // Acción secundaria limpia historial principal
+        // Acción secundaria a hacer: limpia historial principal
         undoRedoGlobal.limpiar();
-        // --- FIN DE CORRECCIÓN ---
 
         Ticket ticketFinalizado = ticketEnAtencion;
         ticketEnAtencion = null;
@@ -159,17 +153,15 @@ public class GestorTickets {
         Nota nuevaNota = ticketEnAtencion.agregarNota(texto);
         AccionAgregarNota accion = new AccionAgregarNota(ticketEnAtencion, nuevaNota);
 
-        // (Paso 4)
         undoRedoTicket.registrarAccion(accion);
 
-        // --- INICIO DE CORRECCIÓN (Paso 4) ---
-        // Acción secundaria limpia historial principal
+        // Acción secundaria para hacer: limpia historial principal
         undoRedoGlobal.limpiar();
-        // --- FIN DE CORRECCIÓN ---
 
         System.out.println("Nota agregada y acción registrada para Undo (Ticket).");
         return true;
     }
+
 
     public boolean eliminarNota(int idNota) {
         if (ticketEnAtencion == null) {
@@ -180,11 +172,7 @@ public class GestorTickets {
         if (notaEliminada != null) {
             AccionEliminarNota accion = new AccionEliminarNota(ticketEnAtencion.getListaNotas(), notaEliminada);
             undoRedoTicket.registrarAccion(accion);
-
-            // --- INICIO DE CORRECCIÓN ---
-            // Acción secundaria limpia historial principal
             undoRedoGlobal.limpiar();
-            // --- FIN DE CORRECCIÓN ---
 
             System.out.println("Nota ID " + idNota + " eliminada y acción registrada para Undo (Ticket).");
             return true;
@@ -211,20 +199,13 @@ public class GestorTickets {
         ticketEnAtencion.cambiarEstado(nuevoEstado);
         AccionCambiarEstado accion = new AccionCambiarEstado(ticketEnAtencion, estadoAnterior, nuevoEstado);
 
-        // (Paso 5)
         undoRedoTicket.registrarAccion(accion);
-
-        // --- INICIO DE CORRECCIÓN (Paso 5) ---
-        // Acción secundaria limpia historial principal
         undoRedoGlobal.limpiar();
-        // --- FIN DE CORRECCIÓN ---
 
         System.out.println("Estado del Ticket #" + ticketEnAtencion.getId() + " cambiado a " + nuevoEstado + ".");
         System.out.println("Acción registrada para Undo (Ticket).");
         return true;
     }
-
-    // --- Métodos de Undo/Redo ---
 
     public boolean deshacerAccionTicket() {
         if (ticketEnAtencion == null && undoRedoTicket.getSize() == 0) {
@@ -246,16 +227,12 @@ public class GestorTickets {
         return undoRedoGlobal.rehacer();
     }
 
-    /**
-     * NUEVO: Limpia solo el historial de acciones del ticket.
-     * Se llama desde la consola cuando el usuario sale del sub-menú de gestión.
-     */
+
+    // Método importante para limpiar los undo o acciones realizados en el ticket actual, y llevarlo a 0
     public void limpiarHistorialTicket() {
-        // (Paso 8)
         undoRedoTicket.limpiar();
     }
 
-    // --- (El resto de la clase: listar, reportes, getters, persistencia, etc. SIN CAMBIOS) ---
     public void listarCasosEnEspera() {
         System.out.println("\n--- Casos en Espera ---");
         System.out.println("\n== EN ATENCIÓN ==");

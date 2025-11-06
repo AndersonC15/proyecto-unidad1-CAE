@@ -10,12 +10,15 @@ public class AccionRecibirTicket extends Accion {
     private Ticket ticket;
     private boolean esUrgente;
 
+    // constructor
     public AccionRecibirTicket(GestorTickets gestor, Ticket ticket) {
         super("RECIBIR_TICKET", "Ticket ID " + ticket.getId());
         this.gestor = gestor;
         this.ticket = ticket;
         this.esUrgente = ticket.esUrgente();
     }
+
+    // Los siguientes métodos para el UNDO/REDO de la acción Recibir Ticket
 
     @Override
     public void ejecutar() {
@@ -40,6 +43,8 @@ public class AccionRecibirTicket extends Accion {
         }
     }
 
+
+    // Método para imprimir con formato en consola
     @Override
     public String getResumenDetallado() {
         return String.format("RECIBIR TICKET: Nuevo ticket #%d (%s) agregado a la cola",
