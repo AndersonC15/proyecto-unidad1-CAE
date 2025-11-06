@@ -38,7 +38,7 @@ public class SistemaCAE {
                     case 1: recibirNuevoCaso(); break;
                     case 2: gestor.listarCasosEnEspera(); break;
                     case 3: iniciarAtencion(); break;
-                    case 4: gestorAtencion(); break; // <-- Llama al nuevo gestorAtencion
+                    case 4: gestorAtencion(); break;
                     case 5: gestionarConsultaHistorial(); break;
                     case 6: ejecutarReportes(); break;
                     case 7: deshacerGlobal(); break;
