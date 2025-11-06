@@ -4,28 +4,29 @@ import modelo.Accion;
 import modelo.Nota;
 import modelo.Ticket;
 
+// Acción concreta para agregar una nota (Undo/Redo de TICKET)
 public class AccionAgregarNota extends Accion {
 
     private final Ticket ticket;
-    private final Nota nota;
+    private final Nota nota; // La nota que se agregó
 
     public AccionAgregarNota(Ticket ticket, Nota nota) {
-        // Tipo y descripción para el historial
-        super("AGREGAR_NOTA", "Nota ID " + nota.id() + ": " + nota.texto());
+        super("AGREGAR_NOTA", "Nota ID " + nota.id());
         this.ticket = ticket;
-        this.nota = nota; // La nota ya fue agregada en el Ticket, se guarda la referencia
+        this.nota = nota;
     }
 
     // Ejecutar (para Redo): Reinserta la nota.
     @Override
     public void ejecutar() {
+        // Vuelve a insertar la nota al inicio de la lista
         ticket.getListaNotas().insertarInicio(nota);
     }
 
     // Deshacer (para Undo): Elimina la nota agregada
     @Override
     public void deshacer() {
-        // Eliminación por primera coincidencia del ID de la nota
+        // Elimina por ID
         ticket.getListaNotas().eliminar(nota.id());
     }
 
@@ -33,5 +34,5 @@ public class AccionAgregarNota extends Accion {
     public String getResumenDetallado() {
         return String.format("AGREGAR_NOTA: Ticket #%d - Nota ID %d: \"%s\"",
                 ticket.getId(), nota.id(), nota.texto());
-    }
+    }
 }
