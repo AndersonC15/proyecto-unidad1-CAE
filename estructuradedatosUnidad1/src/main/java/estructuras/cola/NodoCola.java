@@ -3,12 +3,12 @@ package estructuras.cola;
 import modelo.Ticket;
 
 public class NodoCola {
-    private Ticket dato; // almacena un objeto Ticket, o el estudiante en la cola
-    private NodoCola siguiente; // almacena una referencia al siguiente nodo en la cola
+    private Ticket dato;
+    private NodoCola siguiente;
 
     public NodoCola(Ticket dato) {
         this.dato = dato;
-        this.siguiente = null; // El nodo siguiente es null por defecto
+        this.siguiente = null;
     }
 
     // Getters para acceso en QuequeCAE
