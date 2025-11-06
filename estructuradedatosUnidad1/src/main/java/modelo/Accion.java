@@ -15,14 +15,10 @@ public abstract class Accion {
         this.fechaHora = LocalDateTime.now();
     }
 
-    /**
-     * Ejecuta (o rehace) la acción.
-     */
+    
     public abstract void ejecutar();
 
-    /**
-     * Deshace la acción.
-     */
+  
     public abstract void deshacer();
 
     public String getResumen() {
@@ -30,7 +26,7 @@ public abstract class Accion {
     }
 
     public String getResumenDetallado() {
-        return getResumen(); // Las clases hijas deben sobreescribir esto
+        return getResumen(); 
     }
 
     @Override
