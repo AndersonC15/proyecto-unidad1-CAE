@@ -19,13 +19,13 @@ public enum Estado {
         return descripcion;
     }
 
+    // Helper para persistencia
     public static Estado fromString(String text) {
         for (Estado e : Estado.values()) {
             if (e.name().equalsIgnoreCase(text) || e.descripcion.equalsIgnoreCase(text)) {
                 return e;
             }
         }
-
         // Devuelve EN_COLA como default seguro si no se encuentra
         return EN_COLA;
     }
