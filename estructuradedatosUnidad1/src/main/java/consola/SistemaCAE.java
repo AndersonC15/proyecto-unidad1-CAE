@@ -1,7 +1,7 @@
 package consola;
 
 import modelo.Estado;
-import modelo.Ticket;
+import modelo.Ticket; // Importar Ticket
 import servicio.GestorTickets;
 import servicio.PersistenciaService;
 
@@ -38,7 +38,7 @@ public class SistemaCAE {
                     case 1: recibirNuevoCaso(); break;
                     case 2: gestor.listarCasosEnEspera(); break;
                     case 3: iniciarAtencion(); break;
-                    case 4: gestorAtencion(); break;
+                    case 4: gestorAtencion(); break; // <-- Llama al nuevo gestorAtencion
                     case 5: gestionarConsultaHistorial(); break;
                     case 6: ejecutarReportes(); break;
                     case 7: deshacerGlobal(); break;
@@ -66,6 +66,7 @@ public class SistemaCAE {
         System.out.println("1. Recepción de Nuevo Caso (Encolar)");
         System.out.println("2. Consultar Casos en Espera");
         System.out.println("3. Iniciar Atención del Siguiente Caso (Prioridad Urgente)");
+        // Texto actualizado
         System.out.println("4. Gestionar Caso EN ATENCIÓN");
         System.out.println("5. Consultar Historial de Casos Finalizados");
         System.out.println("--- Administración y Reportes ---");
@@ -77,8 +78,8 @@ public class SistemaCAE {
         System.out.print("Seleccione una opción: ");
     }
 
-    // Método para hacer la gestión del ticket en Atención
     private static void gestorAtencion() {
+        // 1. Validación de entrada
         if (gestor.getTicketEnAtencion() == null && gestor.undoTicketCount() == 0 && gestor.redoTicketCount() == 0) {
             System.err.println("\nError: No hay ningún ticket en atención activa.");
             System.err.println("Use la Opción 3 para iniciar la atención del siguiente caso.");
@@ -94,7 +95,7 @@ public class SistemaCAE {
                     // Ticket Activo
                     volverAlMenuPrincipal = manejarMenuConTicket();
                 } else {
-                    // Sin Ticket Pero con historial
+                    // Sin Ticket
                     volverAlMenuPrincipal = manejarMenuSinTicket();
                 }
             } catch (InputMismatchException e) {
@@ -103,9 +104,9 @@ public class SistemaCAE {
             }
 
         }
+
         System.out.println("Volviendo al Menú Principal...");
     }
-
 
     private static boolean manejarMenuConTicket() throws InputMismatchException {
         Ticket actual = gestor.getTicketEnAtencion();
@@ -133,12 +134,8 @@ public class SistemaCAE {
             case 4: gestor.deshacerAccionTicket(); break;
             case 5: gestor.rehacerAccionTicket(); break;
             case 6:
-                /*
-                No volvemos al menú principal, sino que finalizamos el caso. Es importante
-                para mantener la lógica de solo poder hacer un UNDO Y REDO en la pantalla que
-                estamos actualmente
-                */
-
+                finalizarCasoEnAtencion();
+                break;
             case 0:
                 return true; // Salir al menú principal
             default:
@@ -166,7 +163,8 @@ public class SistemaCAE {
                 if (gestor.deshacerAccionTicket()) {
                     if (gestor.getTicketEnAtencion() != null) {
                         System.out.println("Ticket #" + gestor.getTicketEnAtencion().getId() + " restaurado a 'EN ATENCIÓN'.");
-                        // El bucle while ahora detectará el ticket y cambiará solo al manejarMenuConTicket.
+                        // El bucle 'while' ahora detectará el ticket
+                        // y cambiará solo al 'manejarMenuConTicket'.
                     }
                 }
                 break;
@@ -174,6 +172,7 @@ public class SistemaCAE {
                 if (gestor.rehacerAccionTicket()) {
                     if (gestor.getTicketEnAtencion() == null) {
                         System.out.println("Acción 'Finalizar/Re-encolar' rehecha.");
+                        // Continuar en este menú
                     }
                 }
                 break;
@@ -340,7 +339,6 @@ public class SistemaCAE {
         }
     }
 
-    // método para mostrar un mensaje para decir si el usuario quiere o no guardar los cambios realizados
     private static void promptGuardarDatos() {
         System.out.print("\n¿Desea guardar los cambios realizados en el sistema? (S/N): ");
         String resp = scanner.nextLine();
