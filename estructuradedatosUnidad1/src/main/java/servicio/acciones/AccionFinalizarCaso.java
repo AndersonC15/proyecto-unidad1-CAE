@@ -6,23 +6,23 @@ import modelo.Ticket;
 import servicio.GestorTickets;
 import java.util.TreeMap;
 
-// Acción para Finalizar/Re-encolar (Undo/Redo GLOBAL)
+// Acción para Finalizar o Reencolar un caso
 public class AccionFinalizarCaso extends Accion {
 
     private GestorTickets gestor;
     private Ticket ticket;
-    private Estado estadoOriginalTicket; // El estado que tenía el ticket (COMPLETADO, PENDIENTE, etc.)
+    private Estado estadoOriginalTicket; // El estado del ticket
 
     public AccionFinalizarCaso(GestorTickets gestor, Ticket ticket) {
         super("FINALIZAR_CASO", "Ticket ID " + ticket.getId() + " -> " + ticket.getEstado());
         this.gestor = gestor;
         this.ticket = ticket;
-        this.estadoOriginalTicket = ticket.getEstado(); // Captura el estado final
+        this.estadoOriginalTicket = ticket.getEstado(); // Asigna un estado final
     }
 
     @Override
     public void ejecutar() {
-        // REHACER: Mueve el ticket de 'enAtencion' a su destino final
+        // Mueve el ticket de 'enAtencion' a su destino final
 
         // 1. Quitarlo de 'enAtencion'
         gestor.setTicketEnAtencion(null);
@@ -43,7 +43,7 @@ public class AccionFinalizarCaso extends Accion {
 
     @Override
     public void deshacer() {
-        // DESHACER: Revertir la finalización
+        //Revertir la finalización
 
         // 1. Quitar el ticket de su destino final
         if (estadoOriginalTicket == Estado.COMPLETADO) {
@@ -56,18 +56,15 @@ public class AccionFinalizarCaso extends Accion {
             } else {
                 t = gestor.getColaNormal().eliminarPorId(ticket.getId());
             }
-            // Si t es null, hubo un error, pero continuamos...
+            // Si t es null, hubo un error, pero el proceso continua
         }
 
         // 2. Restaurarlo en 'ticketEnAtencion'
-        //    (Nota: esto pisa cualquier ticket que esté en atención.
         //     El Undo Global debe usarse con cuidado)
         gestor.setTicketEnAtencion(ticket);
 
         // 3. Restaurar el estado que tenía ANTES de finalizar (EN_ATENCION)
-        //    (El estado guardado es el estado *final*. El estado *previo*
-        //     se perdió, asumimos que era EN_ATENCION o PENDIENTE_DOCS/EN_PROCESO)
-        //    Para simplificar, lo ponemos en EN_ATENCION.
+        //    (El estado guardado es el estado *final*. El estado *previo* se perdió, asumimos que era EN_ATENCION o PENDIENTE_DOCS/EN_PROCESO) Para simplificar, lo ponemos en EN_ATENCION.
         ticket.cambiarEstado(Estado.EN_ATENCION);
     }
 
@@ -76,4 +73,5 @@ public class AccionFinalizarCaso extends Accion {
         return String.format("FINALIZAR/RE-ENCOLAR: Ticket #%d movido a %s",
                 ticket.getId(), estadoOriginalTicket);
     }
+
 }
