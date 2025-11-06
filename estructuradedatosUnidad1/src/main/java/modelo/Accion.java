@@ -37,4 +37,4 @@ public abstract class Accion {
     public String toString() {
         return String.format("%s: %s (%s)", tipo, descripcion, fechaHora);
     }
-}ket management methods
+}
