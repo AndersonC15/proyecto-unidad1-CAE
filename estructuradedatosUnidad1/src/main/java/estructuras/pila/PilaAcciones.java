@@ -15,12 +15,13 @@ public class PilaAcciones {
     // Pop: sacar de la cima
     public Accion pop() {
         if (estaVacia()) return null;
-        Accion a = tope.getDato();
-        // Mover el tope al siguiente (referencia en el nodo)
-        tope = tope.getSiguiente();
+
+        Accion a = tope.dato();
+        tope = tope.siguiente();
         size--;
         return a;
     }
+
 
     public boolean estaVacia() {
         return tope == null;
@@ -31,5 +32,7 @@ public class PilaAcciones {
     }
 
     public void limpiar() {
-    }
+        tope = null;
+        size = 0;
+    }
 }
