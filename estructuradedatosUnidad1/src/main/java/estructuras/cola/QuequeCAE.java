@@ -17,13 +17,8 @@ public class QuequeCAE {
         }
         fin = nuevo;
         tamanio++;
-        // La lógica de cambiar estado se mueve a GestorTickets
     }
 
-    /**
-     * NUEVO: Inserta al frente. Necesario para Undo de 'iniciarAtencion'.
-     * Rompe FIFO intencionalmente.
-     */
     public void enquequeAlFrente(Ticket ticket) {
         NodoCola nuevo = new NodoCola(ticket);
         if (estaVacia()) {
@@ -36,7 +31,7 @@ public class QuequeCAE {
         tamanio++;
     }
 
-    // Sacar el ticket del frente de la cola (FIFO)
+    // Sacar el ticket del frente de la cola 
     public Ticket dequeue() {
         if (estaVacia()) {
             return null;
@@ -50,19 +45,15 @@ public class QuequeCAE {
         return ticketAtendido;
     }
 
-    /**
-     * NUEVO: Elimina un ticket por ID. Necesario para Undo de 'recibirNuevoCaso'.
-     * @return El ticket eliminado, o null si no se encuentra.
-     */
+   
     public Ticket eliminarPorId(int id) {
         if (estaVacia()) return null;
 
-        // Caso 1: Es la cabeza
+       
         if (frente.getDato().getId() == id) {
             return dequeue(); // Dequeue maneja la lógica de re-asignar frente y fin
         }
-
-        // Caso 2: Es un nodo intermedio o el final
+        
         NodoCola actual = frente;
         while (actual.getSiguiente() != null && actual.getSiguiente().getDato().getId() != id) {
             actual = actual.getSiguiente();
@@ -86,7 +77,7 @@ public class QuequeCAE {
         return ticketEliminado;
     }
 
-    // Recorrer y listar los tickets en espera (Request #6)
+    
     public void listar() {
         if (estaVacia()) {
             System.out.println("  (Vacía)");
@@ -95,22 +86,16 @@ public class QuequeCAE {
         NodoCola actual = frente;
         int i = 1;
         while (actual != null) {
-            // Se usa el toString de Ticket (mejorado)
             System.out.println("  " + (i++) + ". " + actual.getDato().toString());
             actual = actual.getSiguiente();
         }
     }
 
-    /**
-     * NUEVO: Getter para persistencia y reportes
-     */
+
     public NodoCola getFrente() {
         return frente;
     }
 
-    /**
-     * NUEVO: Para cargar datos
-     */
     public void limpiar() {
         frente = null;
         fin = null;
