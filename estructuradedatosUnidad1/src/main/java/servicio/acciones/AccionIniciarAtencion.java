@@ -21,7 +21,7 @@ public class AccionIniciarAtencion extends Accion {
 
     @Override
     public void ejecutar() {
-        // REHACER: Vuelve a poner el ticket en 'ticketEnAtencion'
+        // Vuelve a poner el ticket en 'ticketEnAtencion'
 
         Ticket t;
         if (eraUrgente) {
@@ -33,24 +33,20 @@ public class AccionIniciarAtencion extends Accion {
         gestor.setTicketEnAtencion(ticketAtendido);
         ticketAtendido.cambiarEstado(Estado.EN_ATENCION);
 
-        // --- MODIFICACIÓN (REDO) ---
         // Re-consumir la urgencia, tal como lo hace la acción original
         if (eraUrgente) {
             ticketAtendido.setEsUrgente(false);
         }
-        // -------------------------
     }
 
     @Override
     public void deshacer() {
-        // DESHACER: Devuelve el ticket a la cola de la que salió
+        // Devuelve el ticket a su cola de salida
 
         gestor.setTicketEnAtencion(null);
 
-        // --- MODIFICACIÓN (UNDO) ---
-        // Restauramos la bandera 'esUrgente' ANTES de encolar
+        // Restaura la bandera 'esUrgente' ANTES de encolarla
         ticketAtendido.setEsUrgente(this.eraUrgente);
-        // -------------------------
 
         if (eraUrgente) {
             ticketAtendido.cambiarEstado(Estado.URGENTE);
@@ -68,3 +64,4 @@ public class AccionIniciarAtencion extends Accion {
                 ticketAtendido.getId(), eraUrgente ? "Urgente" : "Normal");
     }
 }
+
