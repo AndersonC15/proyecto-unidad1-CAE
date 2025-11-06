@@ -24,10 +24,10 @@ public class AccionFinalizarCaso extends Accion {
     public void ejecutar() {
         // REHACER: Mueve el ticket de 'enAtencion' a su destino final
 
-        // Quitarlo de enAtencion
+        // 1. Quitarlo de 'enAtencion'
         gestor.setTicketEnAtencion(null);
 
-        // Moverlo a su destino
+        // 2. Moverlo a su destino
         if (estadoOriginalTicket == Estado.COMPLETADO) {
             gestor.getTicketsFinalizados().put(ticket.getId(), ticket);
         } else {
@@ -45,6 +45,7 @@ public class AccionFinalizarCaso extends Accion {
     public void deshacer() {
         // DESHACER: Revertir la finalización
 
+        // 1. Quitar el ticket de su destino final
         if (estadoOriginalTicket == Estado.COMPLETADO) {
             gestor.getTicketsFinalizados().remove(ticket.getId());
         } else {
@@ -55,10 +56,18 @@ public class AccionFinalizarCaso extends Accion {
             } else {
                 t = gestor.getColaNormal().eliminarPorId(ticket.getId());
             }
+            // Si t es null, hubo un error, pero continuamos...
         }
 
-        // Restaurarlo en 'ticketEnAtencion'
+        // 2. Restaurarlo en 'ticketEnAtencion'
+        //    (Nota: esto pisa cualquier ticket que esté en atención.
+        //     El Undo Global debe usarse con cuidado)
         gestor.setTicketEnAtencion(ticket);
+
+        // 3. Restaurar el estado que tenía ANTES de finalizar (EN_ATENCION)
+        //    (El estado guardado es el estado final. El estado previo
+        //     se perdió, asumimos que era EN_ATENCION o PENDIENTE_DOCS/EN_PROCESO)
+        //    Para simplificar, lo ponemos en EN_ATENCION.
         ticket.cambiarEstado(Estado.EN_ATENCION);
     }
 
