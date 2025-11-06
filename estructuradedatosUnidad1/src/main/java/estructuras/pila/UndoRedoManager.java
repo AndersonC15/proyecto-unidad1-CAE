@@ -49,5 +49,5 @@ public class UndoRedoManager {
     public void limpiar() {
         pilaUndo.limpiar();
         pilaRedo.limpiar();
-    }
+    }
 }

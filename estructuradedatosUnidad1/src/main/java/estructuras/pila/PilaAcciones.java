@@ -33,6 +33,6 @@ public class PilaAcciones {
 
     public void limpiar() {
         tope = null;
-        size = 0;
-    }
+        size=0;
+    }
 }

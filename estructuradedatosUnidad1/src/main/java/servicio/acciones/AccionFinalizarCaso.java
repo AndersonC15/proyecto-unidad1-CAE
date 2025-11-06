@@ -65,7 +65,7 @@ public class AccionFinalizarCaso extends Accion {
         gestor.setTicketEnAtencion(ticket);
 
         // 3. Restaurar el estado que tenía ANTES de finalizar (EN_ATENCION)
-        //    (El estado guardado es el estado final. El estado previo
+        //    (El estado guardado es el estado *final*. El estado *previo*
         //     se perdió, asumimos que era EN_ATENCION o PENDIENTE_DOCS/EN_PROCESO)
         //    Para simplificar, lo ponemos en EN_ATENCION.
         ticket.cambiarEstado(Estado.EN_ATENCION);

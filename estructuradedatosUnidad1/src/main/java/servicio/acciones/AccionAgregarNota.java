@@ -34,5 +34,5 @@ public class AccionAgregarNota extends Accion {
     public String getResumenDetallado() {
         return String.format("AGREGAR_NOTA: Ticket #%d - Nota ID %d: \"%s\"",
                 ticket.getId(), nota.id(), nota.texto());
-    }
+    }
 }
